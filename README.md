@@ -66,11 +66,11 @@ It solves this as a **resource-constrained scheduling optimization problem** usi
 
 | Resource | URL |
 |----------|-----|
-| 🌐 **Live Web App** | `https://smartsettle.vercel.app` |
+| 🌐 **Live Web App** | `https://smartsettle-payment-routing.netlify.app/` |
 | 📡 **REST API (Swagger UI)** | `https://smartsettle-api.onrender.com/docs` |
 | 📡 **REST API Base** | `https://smartsettle-api.onrender.com` |
-| 🎥 **Demo Video** | `https://youtube.com/watch?v=YOUR_VIDEO_ID` |
-| 📊 **Presentation Slides** | `https://docs.google.com/presentation/d/YOUR_SLIDE_ID` |
+| 🎥 **Demo Video** | `https://gregarious-figolla-7a2888.netlify.app/` |
+| 📊 **Presentation Slides** | `https://gregarious-figolla-7a2888.netlify.app/` |
 | 📄 **Algorithm Report** | [`/docs/Algorithm_Rationale.md`](./docs/Algorithm_Rationale.md) |
 
 > ⚠️ Replace placeholder URLs with your actual deployed endpoints before final submission.
