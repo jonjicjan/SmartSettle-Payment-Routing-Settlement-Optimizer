@@ -17,7 +17,7 @@
 
 <br/>
 
-[![SIH 2025](https://img.shields.io/badge/Smart%20India%20Hackathon-2025-FF6B35?style=for-the-badge)](https://www.sih.gov.in/)
+[![SIH 2025](https://img.shields.io/badge/Hackathon-2K26-FF6B35?style=for-the-badge)](https://www.sih.gov.in/)
 [![Track](https://img.shields.io/badge/Track-FinTech%20%26%20Payments-00C9A7?style=for-the-badge)](/)
 [![Score](https://img.shields.io/badge/Evaluation-55pts%20Cost%20%2B%2020pts%20Algo-gold?style=for-the-badge)](/)
 
@@ -40,32 +40,10 @@
 
 ---
 
-## 📋 Table of Contents
-
-1. [What is SmartSettle?](#-what-is-smartsettle)
-2. [Live Demo & Links](#-live-demo--links)
-3. [The Problem](#-the-problem)
-4. [Algorithm — Full Deep Dive](#-algorithm--full-deep-dive)
-5. [Tech Stack](#-tech-stack)
-6. [Frontend Features](#-frontend-features)
-7. [Project Structure](#-project-structure)
-8. [Installation & Setup](#-installation--setup)
-9. [Usage Guide](#-usage-guide)
-10. [IO Specification / API Reference](#-io-specification--api-reference)
-11. [Channel Architecture](#-channel-architecture)
-12. [Cost Formula — Exact Implementation](#-cost-formula--exact-implementation)
-13. [Dataset Reference](#-dataset-reference)
-14. [Test Results & Benchmarks](#-test-results--benchmarks)
-15. [Resilience & Edge Cases](#-resilience--edge-cases)
-16. [Constraints & Disqualification Prevention](#-constraints--disqualification-prevention)
-17. [Team](#-team)
-18. [Contributing](#-contributing)
-
----
 
 ## 🏦 What is SmartSettle?
 
-SmartSettle is a **cost-aware payment routing and settlement optimizer** built for the Smart India Hackathon 2025 Fintech track.
+SmartSettle is a **cost-aware payment routing and settlement optimizer** built for the Hackathon 2026 Fintech track.
 
 Given a batch of payment transactions, SmartSettle assigns each one to the optimal settlement channel — **FAST**, **STANDARD**, or **BULK** — to minimize:
 
@@ -267,93 +245,6 @@ Buckets are informational only — actual routing is always cost-formula driven.
 
 Handles 2,000+ transactions in under 50ms on any modern hardware.
 
-### Complete Hackathon-Ready Python Implementation
-
-```python
-import heapq
-import pandas as pd
-import json
-
-# ── Configuration (all params in one place) ───────────────────────────────────
-P = 0.001   # delay penalty factor
-F = 0.5     # failure penalty factor
-
-CHANNELS = {
-    "Channel_F": {"fee": 5.0,  "latency": 1,  "capacity": 2},
-    "Channel_S": {"fee": 1.0,  "latency": 3,  "capacity": 4},
-    "Channel_B": {"fee": 0.20, "latency": 10, "capacity": 10},
-}
-
-# ── Step 1: Load and pre-compute ──────────────────────────────────────────────
-df = pd.read_csv("transactions.csv")
-transactions = df.to_dict("records")
-
-for tx in transactions:
-    tx["deadline"]      = tx["arrival_time"] + tx["max_delay"]
-    tx["urgency_score"] = (tx["amount"] * tx["priority"]) / (tx["max_delay"] + 1)
-    tx["failure_cost"]  = F * tx["amount"]
-
-# ── Step 2: Sort by urgency ───────────────────────────────────────────────────
-transactions.sort(key=lambda t: (t["deadline"], -t["urgency_score"], -t["priority"]))
-
-# ── Step 3: Initialize channel min-heaps ─────────────────────────────────────
-heaps = {}
-for ch_id, ch in CHANNELS.items():
-    heaps[ch_id] = [0] * ch["capacity"]
-    heapq.heapify(heaps[ch_id])
-
-# ── Step 4: Main scheduling loop ─────────────────────────────────────────────
-assignments = []
-total_cost  = 0.0
-
-for tx in transactions:
-    options = []
-
-    for ch_id, ch in CHANNELS.items():
-        start_time = max(tx["arrival_time"], heaps[ch_id][0])
-        if start_time <= tx["deadline"]:
-            delay = start_time - tx["arrival_time"]
-            cost  = ch["fee"] + P * tx["amount"] * delay
-            options.append((cost, ch_id, start_time))
-
-    options.sort()
-    fc = tx["failure_cost"]
-
-    if not options or options[0][0] > fc:
-        assignments.append({
-            "tx_id": tx["tx_id"], "channel_id": None,
-            "start_time": None,   "failed": True
-        })
-        total_cost += fc
-        continue
-
-    best_cost, best_ch, best_start = options[0]
-    finish_time = best_start + CHANNELS[best_ch]["latency"]
-
-    heapq.heappop(heaps[best_ch])
-    heapq.heappush(heaps[best_ch], finish_time)
-
-    assignments.append({
-        "tx_id":      tx["tx_id"],
-        "channel_id": best_ch,
-        "start_time": int(best_start)
-    })
-    total_cost += best_cost
-
-# ── Step 5: Write output ──────────────────────────────────────────────────────
-output = {
-    "assignments": assignments,
-    "total_system_cost_estimate": round(total_cost, 2)
-}
-
-with open("submission.json", "w") as f:
-    json.dump(output, f, indent=2)
-
-print(f"Total cost: ₹{total_cost:.2f}")
-print(f"Routed:     {sum(1 for a in assignments if not a.get('failed'))}")
-print(f"Failed:     {sum(1 for a in assignments if a.get('failed'))}")
-```
-
 ---
 
 ## 🛠 Tech Stack
@@ -459,20 +350,6 @@ The SmartSettle web app is a full interactive dashboard built in React 19 with T
 
 - **Recharts visualizations** — cost per transaction bar chart, channel heatmap
 - **Algorithm display** — shows which algorithm variant produced the current result
-
-### React State Architecture
-
-```typescript
-const [transactions, setTransactions]           // input CSV data
-const [scheduledTransactions, setScheduled]     // algorithm output
-const [costBreakdown, setCostBreakdown]         // fee/penalty breakdown
-const [currentTime, setCurrentTime]             // simulation clock
-const [isSimulating, setIsSimulating]           // play/pause state
-const [simulationSpeed, setSimulationSpeed]     // ms per tick
-const [activeTab, setActiveTab]                 // current visible tab
-const [algorithm, setAlgorithm]                 // 'edf' | 'threshold'
-const fileInputRef                              // ref for hidden file input
-```
 
 ---
 
@@ -957,21 +834,6 @@ CHANNELS = {
 
 ---
 
-## 👥 Team
-
-| Member | Role | Key Contributions |
-|--------|------|------------------|
-| **[Name 1]** | Algorithm Lead | Core scheduler, heap implementation, cost formula, break-even analysis |
-| **[Name 2]** | Backend Engineer | FastAPI server, CSV parser, JSON output, constraint validator |
-| **[Name 3]** | Frontend Engineer | React dashboard, Recharts visualization, simulation engine |
-| **[Name 4]** | QA Engineer | Test datasets (best/worst/large), verify.py, edge case testing |
-| **[Name 5]** | Presenter | 2-min pitch, README, algorithm rationale document |
-| **[Name 6]** | Full Stack | Vercel + Render deployment, GitHub Actions CI/CD, integration |
-
-> Replace with your actual team names before submission.
-
----
-
 ## 🤝 Contributing
 
 ```bash
@@ -1009,7 +871,7 @@ MIT License — free to use, modify, and distribute. See [LICENSE](LICENSE).
 
 ## 🙏 Acknowledgements
 
-- **Smart India Hackathon 2025** — problem statement and platform
+- **Hackathon 2026** — problem statement and platform
 - **Earliest Deadline First (EDF)** — theoretical scheduling foundation
 - **Python `heapq`** — priority queue powering slot tracking
 - **shadcn/ui** — accessible, beautiful component library
@@ -1024,7 +886,7 @@ MIT License — free to use, modify, and distribute. See [LICENSE](LICENSE).
 
 **SmartSettle — Route smarter. Settle faster. Pay less.**
 
-*Built with ❤️ for Smart India Hackathon 2025*
+*Built with ❤️ for Hackathon 2026*
 
 <br/>
 
