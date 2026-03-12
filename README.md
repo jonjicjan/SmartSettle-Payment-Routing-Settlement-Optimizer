@@ -32,7 +32,7 @@
 
 <br/>
 
-**[🌐 Live Demo](https://smartsettle.vercel.app)** · **[📡 API Docs](https://smartsettle-api.onrender.com/docs)** · **[🎥 Demo Video](#)** · **[📄 Problem Statement](./docs/PS.pdf)**
+**[🌐 Live Demo](https://smartsettle-payment-routing.netlify.app/)** · **[📡 API Docs](https://smartsettle-api.onrender.com/docs)** · **[🎥 Demo Video](https://smartsettle-payment-routing.netlify.app/)** · **[📄 Problem Statement](./docs/PS.pdf)**
 
 <br/>
 
@@ -356,76 +356,120 @@ The SmartSettle web app is a full interactive dashboard built in React 19 with T
 ## 📁 Project Structure
 
 ```
-smartsettle/
+smartsettle/├── index.html
+├── package.json
+├── package-lock.json
+├── vite.config.ts
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── tailwind.config.js
+├── postcss.config.js
+├── components.json
+├── README.md
+├── FILE_STRUCTURE.md
 │
-├── 📂 algorithm/                    # Python core engine
-│   ├── scheduler.py                 # Main scheduling algorithm
-│   ├── cost_calculator.py           # Cost formula, break-even computation
-│   ├── validator.py                 # Pre-submission constraint checker
-│   └── config.py                   # Channel params (fees, latency, capacity)
+├── public/                    # Static assets (if present)
 │
-├── 📂 api/                          # FastAPI REST server
-│   ├── main.py                      # App entry, CORS, middleware setup
-│   ├── requirements.txt             # Python dependencies
-│   └── 📂 routes/
-│       ├── solve.py                 # POST /solve
-│       └── validate.py             # POST /validate
+├── scripts/
+│   └── compute_settle_output.py   # Python script for EDF/Threshold output
 │
-├── 📂 src/                          # React + TypeScript frontend
-│   ├── App.tsx                      # Root component (1085 lines)
-│   ├── main.tsx                     # Entry point, React 19 DOM render
-│   ├── index.css                    # Global styles, CSS variables, animations
-│   ├── App.css                      # Glow effects, channel card styles
+├── src/
+│   ├── main.tsx              # App entry point
+│   ├── App.tsx               # Root component, state, routing
+│   ├── App.css
+│   ├── index.css             # Global styles, Tailwind, utilities
 │   │
-│   ├── 📂 types/                    # TypeScript interfaces & constants
-│   │   ├── transaction.ts           # Transaction, ScheduledTransaction
-│   │   ├── channel.ts               # Channel config, CHANNELS constant
-│   │   └── index.ts                 # Barrel re-exports
+│   ├── types/
+│   │   └── index.ts          # Shared types, CHANNELS, constants
 │   │
-│   ├── 📂 lib/                      # Business logic (TypeScript)
-│   │   ├── scheduler.ts             # EDF + threshold scheduling (TS port)
-│   │   └── csvParser.ts             # CSV parser, sample generator, JSON downloader
+│   ├── lib/
+│   │   ├── scheduler.ts      # EDF & Threshold scheduling logic
+│   │   ├── hybridScheduler.ts # Hybrid meta-scheduler (run both, pick best)
+│   │   ├── constraintValidator.ts # Pre-submit validation
+│   │   ├── csvParser.ts      # CSV parse / generate / download
+│   │   ├── animations.ts     # Framer Motion variants, transitions
+│   │   └── utils.ts          # cn(), etc.
 │   │
-│   └── 📂 components/ui/            # shadcn/ui (40+ components)
-│       ├── button.tsx
-│       ├── tabs.tsx
-│       ├── table.tsx
-│       ├── badge.tsx
-│       ├── progress.tsx
-│       ├── slider.tsx
-│       └── ... (35+ more)
+│   ├── hooks/
+│   │   └── use-mobile.ts     # Mobile breakpoint hook
+│   │
+│   ├── components/
+│   │   ├── TopNav.tsx        # Top bar, tabs, cost/success status
+│   │   ├── Sidebar.tsx       # Nav, channels, algorithm selector
+│   │   ├── GlassCard.tsx     # Glassmorphism card wrapper
+│   │   ├── ChannelCard.tsx   # Channel utilization card
+│   │   ├── StatCard.tsx      # Metric stat block
+│   │   ├── AnimatedProgress.tsx
+│   │   ├── AnimatedNumber.tsx
+│   │   ├── OptimizationVisualizer.tsx  # Routing graph + cost chart
+│   │   │
+│   │   └── ui/               # Radix / shadcn-style primitives
+│   │       ├── accordion.tsx
+│   │       ├── alert.tsx
+│   │       ├── alert-dialog.tsx
+│   │       ├── aspect-ratio.tsx
+│   │       ├── avatar.tsx
+│   │       ├── badge.tsx
+│   │       ├── breadcrumb.tsx
+│   │       ├── button.tsx
+│   │       ├── button-group.tsx
+│   │       ├── calendar.tsx
+│   │       ├── card.tsx
+│   │       ├── carousel.tsx
+│   │       ├── chart.tsx
+│   │       ├── checkbox.tsx
+│   │       ├── collapsible.tsx
+│   │       ├── command.tsx
+│   │       ├── context-menu.tsx
+│   │       ├── dialog.tsx
+│   │       ├── drawer.tsx
+│   │       ├── dropdown-menu.tsx
+│   │       ├── empty.tsx
+│   │       ├── field.tsx
+│   │       ├── form.tsx
+│   │       ├── hover-card.tsx
+│   │       ├── input.tsx
+│   │       ├── input-group.tsx
+│   │       ├── input-otp.tsx
+│   │       ├── item.tsx
+│   │       ├── kbd.tsx
+│   │       ├── label.tsx
+│   │       ├── menubar.tsx
+│   │       ├── navigation-menu.tsx
+│   │       ├── pagination.tsx
+│   │       ├── popover.tsx
+│   │       ├── progress.tsx
+│   │       ├── radio-group.tsx
+│   │       ├── resizable.tsx
+│   │       ├── scroll-area.tsx
+│   │       ├── select.tsx
+│   │       ├── separator.tsx
+│   │       ├── sheet.tsx
+│   │       ├── sidebar.tsx
+│   │       ├── skeleton.tsx
+│   │       ├── slider.tsx
+│   │       ├── sonner.tsx
+│   │       ├── spinner.tsx
+│   │       ├── switch.tsx
+│   │       ├── table.tsx
+│   │       ├── tabs.tsx
+│   │       ├── textarea.tsx
+│   │       ├── toggle.tsx
+│   │       ├── toggle-group.tsx
+│   │       └── tooltip.tsx
+│   │
+│   └── sections/
+│       ├── InputSection.tsx     # CSV upload, algorithm, transaction list
+│       ├── ScheduleSection.tsx  # Scheduled transactions table
+│       ├── SimulationSection.tsx # Play/pause, channel cards, visualizer
+│       └── ResultsSection.tsx   # Cost breakdown, validation, JSON, download
 │
-├── 📂 data/                          # All test datasets
-│   ├── 📂 best_case/                # BC1–BC5 (12–30 txs)
-│   ├── 📂 worst_case/              # WC1–WC8 (10–100 txs)
-│   └── 📂 large/                   # LARGE1–LARGE5 (500–2000 txs)
-│
-├── 📂 docs/
-│   ├── SmartSettle_PS.pdf
-│   ├── Implementation_Plan.txt
-│   ├── Algorithm_Rationale.md
-│   └── Pitch_Script.md
-│
-├── 📂 tests/
-│   ├── test_scheduler.py
-│   ├── test_validator.py
-│   ├── test_cost_formula.py
-│   └── conftest.py
-│
-├── transactions.csv                  # Sample input (3 transactions)
-├── submission.json                   # Sample output
-├── verify.py                         # Judge's verifier script
-├── index.html                        # Vite HTML entry
-├── vite.config.ts                   # Vite + React plugin config
-├── tailwind.config.js               # Tailwind + shadcn theme
-├── tsconfig.json                     # Root TS config
-├── tsconfig.app.json                # App TS config
-├── tsconfig.node.json               # Node/Vite TS config
-├── postcss.config.js                # Tailwind + Autoprefixer
-├── components.json                   # shadcn/ui config
-├── eslint.config.js                  # ESLint flat config (v9)
-├── package.json                      # 35 dependencies
-└── README.md
+└── dist/                    # Production build output (after npm run build)
+    ├── index.html
+    └── assets/
+        ├── index-*.css
+        └── index-*.js
 ```
 
 ---
@@ -443,7 +487,7 @@ npm --version      # 9.x+
 ### 1 — Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/smartsettle.git
+git clone https://github.com/jonjicjan/SmartSettle-Payment-Routing-Settlement-Optimizer.git
 cd smartsettle
 ```
 
@@ -890,7 +934,7 @@ MIT License — free to use, modify, and distribute. See [LICENSE](LICENSE).
 
 <br/>
 
-[![GitHub Stars](https://img.shields.io/github/stars/YOUR_USERNAME/smartsettle?style=social)](https://github.com/YOUR_USERNAME/smartsettle/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/YOUR_USERNAME/smartsettle?style=social)](https://github.com/jonjicjan/SmartSettle-Payment-Routing-Settlement-Optimizer.git)
 [![GitHub Forks](https://img.shields.io/github/forks/YOUR_USERNAME/smartsettle?style=social)](https://github.com/YOUR_USERNAME/smartsettle/network/members)
 
 </div>
